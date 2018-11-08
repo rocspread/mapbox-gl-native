@@ -207,8 +207,8 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
   }
 
   private void toggleMapStyle() {
-    String styleUrl = mapboxMap.getStyleUrl().contentEquals(Style.DARK) ? Style.LIGHT : Style.DARK;
-    mapboxMap.setStyle(styleUrl);
+    String styleUrl = Style.DARK.equals(mapboxMap.getStyle().getUrl()) ? Style.LIGHT : Style.DARK;
+    mapboxMap.setStyle(new Style.Builder().fromUrl(styleUrl));
   }
 
   private void disableGesturesManagement() {

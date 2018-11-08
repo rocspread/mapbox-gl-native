@@ -154,7 +154,8 @@ class LocationComponentTest : BaseActivityTest() {
     val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
       override fun onLocationComponentAction(component: LocationComponent, mapboxMap: MapboxMap,
                                              uiController: UiController, context: Context) {
-        mapboxMap.setStyle(Style.LIGHT)
+
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.LIGHT))
         component.activateLocationComponent(context, false)
         component.isLocationComponentEnabled = true
         component.forceLocationUpdate(location)
@@ -507,7 +508,7 @@ class LocationComponentTest : BaseActivityTest() {
         mapboxMap.waitForLayer(uiController, location, FOREGROUND_LAYER)
 
         component.isLocationComponentEnabled = false
-        mapboxMap.setStyle(Style.LIGHT)
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.LIGHT))
 
         component.isLocationComponentEnabled = true
         mapboxMap.waitForLayer(uiController, location, FOREGROUND_LAYER)
@@ -578,7 +579,7 @@ class LocationComponentTest : BaseActivityTest() {
         component.onStop()
         component.onStart()
 
-        mapboxMap.setStyle(Style.DARK)
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.DARK))
         uiController.loopMainThreadForAtLeast(MAP_CONNECTION_DELAY)
       }
     }
@@ -592,7 +593,7 @@ class LocationComponentTest : BaseActivityTest() {
                                              uiController: UiController, context: Context) {
         component.activateLocationComponent(context, false)
         component.isLocationComponentEnabled = true
-        mapboxMap.setStyle(Style.DARK)
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.DARK))
         component.onStop()
         component.onStart()
         uiController.loopMainThreadForAtLeast(MAP_CONNECTION_DELAY)
@@ -646,7 +647,7 @@ class LocationComponentTest : BaseActivityTest() {
         component.activateLocationComponent(context, false)
         component.isLocationComponentEnabled = true
         component.forceLocationUpdate(location)
-        mapboxMap.setStyle(Style.LIGHT)
+        mapboxMap.setStyle(Style.Builder().fromUrl(Style.LIGHT))
         component.onStop()
         uiController.loopMainThreadForAtLeast(MAP_CONNECTION_DELAY)
         component.onStart()

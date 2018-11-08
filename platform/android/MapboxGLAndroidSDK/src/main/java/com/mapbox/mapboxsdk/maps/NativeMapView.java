@@ -71,6 +71,8 @@ final class NativeMapView {
   // Flag to indicating destroy was called
   private boolean destroyed = false;
 
+  private Style style;
+
   // Holds the pointer to JNI NativeMapView
   @Keep
   long nativePtr = 0;
@@ -933,6 +935,9 @@ final class NativeMapView {
 
   @Keep
   private void onWillStartLoadingMap() {
+    if (style != null) {
+      style.onWillStartLoadingStyle();
+    }
     stateCallback.onWillStartLoadingMap();
   }
 
@@ -968,6 +973,7 @@ final class NativeMapView {
 
   @Keep
   private void onDidFinishLoadingStyle() {
+    style.onDidFinishLoadingStyle();
     stateCallback.onDidFinishLoadingStyle();
   }
 
@@ -1335,6 +1341,10 @@ final class NativeMapView {
       }
 
     });
+  }
+
+  public void setStyleCallback(Style style) {
+    this.style = style;
   }
 
   //

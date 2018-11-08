@@ -14,6 +14,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.CircleLayer;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.layers.Layer;
@@ -490,7 +491,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
   }
 
   private void styleFillFilterLayer() {
-    mapboxMap.setStyleUrl("asset://fill_filter_style.json");
+    mapboxMap.setStyle(new Style.Builder().fromUrl("asset://fill_filter_style.json"));
     mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(31, -100), 3));
 
     Handler handler = new Handler(getMainLooper());
@@ -518,7 +519,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
   }
 
   private void styleLineFilterLayer() {
-    mapboxMap.setStyleUrl("asset://line_filter_style.json");
+    mapboxMap.setStyle(new Style.Builder().fromUrl("asset://line_filter_style.json"));
     mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40, -97), 5));
 
     Handler handler = new Handler(getMainLooper());
@@ -546,7 +547,7 @@ public class RuntimeStyleActivity extends AppCompatActivity {
   }
 
   private void styleNumericFillLayer() {
-    mapboxMap.setStyleUrl("asset://numeric_filter_style.json");
+    mapboxMap.setStyle(new Style.Builder().fromUrl("asset://numeric_filter_style.json"));
     mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40, -97), 5));
 
     Handler handler = new Handler(getMainLooper());

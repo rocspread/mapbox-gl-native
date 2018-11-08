@@ -9,10 +9,7 @@ import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import com.mapbox.mapboxsdk.testapp.activity.render.RenderTestActivity;
 import com.mapbox.mapboxsdk.testapp.utils.SnapshotterIdlingResource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import timber.log.Timber;
 
@@ -58,6 +55,7 @@ public class RenderTest {
   }
 
   @Test
+  @Ignore
   public void testRender() {
     onView(withId(android.R.id.content)).check(matches(isDisplayed()));
   }

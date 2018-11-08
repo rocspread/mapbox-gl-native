@@ -14,7 +14,7 @@ import com.mapbox.mapboxsdk.testapp.activity.BaseActivityTest
 import com.mapbox.mapboxsdk.testapp.activity.maplayout.SimpleMapActivity
 import org.junit.Test
 
-class CustomGeometrySourceTest : BaseActivityTest() {
+class LoadTest : BaseActivityTest() {
 
     override fun getActivityClass(): Class<*> = SimpleMapActivity::class.java
 
@@ -32,9 +32,9 @@ class CustomGeometrySourceTest : BaseActivityTest() {
                             )
                     )
             )
-            style.addSource(source)
+            style!!.addSource(source)
 
-            style.loadStyle(Style.DARK)
+            mapboxMap.setStyle(Style.DARK)
 
             uiController.loopMainThreadForAtLeast(300)
 
@@ -62,12 +62,12 @@ class CustomGeometrySourceTest : BaseActivityTest() {
                             )
                     )
             )
-            style.addSource(source)
+            style!!.addSource(source)
 
             val layer = SymbolLayer("test", "source-id")
             style.addLayer(layer)
 
-            style.loadStyle(Style.DARK)
+            mapboxMap.setStyle(Style.Builder().fromUrl(Style.DARK))
 
             layer.setProperties(iconImage("bus-15"))
 

@@ -10,12 +10,16 @@ import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.testapp.R;
 
 import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
+
+import static com.mapbox.mapboxsdk.style.expressions.Expression.rgb;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.backgroundColor;
 
 /**
  * Test activity showcasing using the query rendered features API to count features in a rectangle.
@@ -37,6 +41,9 @@ public class QueryRenderedFeaturesBoxCountActivity extends AppCompatActivity {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(mapboxMap -> {
       QueryRenderedFeaturesBoxCountActivity.this.mapboxMap = mapboxMap;
+
+      mapboxMap.setStyle(new Style.Builder().fromUrl(Style.MAPBOX_STREETS));
+
       selectionBox.setOnClickListener(view -> {
         // Query
         int top = selectionBox.getTop() - mapView.getTop();

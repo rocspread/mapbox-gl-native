@@ -36,7 +36,9 @@ import com.mapbox.mapboxsdk.maps.widgets.CompassView;
 import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.offline.OfflineRegionDefinition;
 import com.mapbox.mapboxsdk.storage.FileSource;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
+import timber.log.Timber;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -178,8 +180,6 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     compassView.injectCompassAnimationListener(createCompassAnimationListener(cameraChangeDispatcher));
     compassView.setOnClickListener(createCompassClickListener(cameraChangeDispatcher));
 
-    // LocationComponent
-    mapboxMap.injectLocationComponent(new LocationComponent(mapboxMap));
 
     // inject widgets with MapboxMap
     attrView.setOnClickListener(new AttributionClickListener(context, mapboxMap));
@@ -200,6 +200,14 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     } else {
       mapboxMap.onRestoreInstanceState(savedInstanceState);
     }
+
+    addOnDidFinishLoadingStyleListener(new OnDidFinishLoadingStyleListener() {
+      @Override
+      public void onDidFinishLoadingStyle() {
+        mapboxMap.injectLocationComponent(new LocationComponent(mapboxMap));
+
+      }
+    });
 
     mapCallback.initialised();
   }
@@ -307,6 +315,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     nativeMapView = new NativeMapView(
       getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
+    List<Layer> layers = nativeMapView.getLayers();
+    for (Layer layer : layers) {
+      Timber.e(layer.getId());
+    }
   }
 
   private void onSurfaceCreated() {
@@ -484,42 +496,6 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * <p>
-   * Loads a new map style from the specified URL.
-   * </p>
-   * {@code url} can take the following forms:
-   * <ul>
-   * <li>{@code Style.*}: load one of the bundled styles in {@link Style}.</li>
-   * <li>{@code mapbox://styles/<user>/<style>}:
-   * retrieves the style from a <a href="https://www.mapbox.com/account/">Mapbox account.</a>
-   * {@code user} is your username. {@code style} is the ID of your custom
-   * style created in <a href="https://www.mapbox.com/studio">Mapbox Studio</a>.</li>
-   * <li>{@code http://...} or {@code https://...}:
-   * retrieves the style over the Internet from any web server.</li>
-   * <li>{@code asset://...}:
-   * reads the style from the APK {@code assets/} directory.
-   * This is used to load a style bundled with your app.</li>
-   * <li>{@code null}: loads the default {@link Style#MAPBOX_STREETS} style.</li>
-   * </ul>
-   * <p>
-   * This method is asynchronous and will return immediately before the style finishes loading.
-   * If you wish to wait for the map to finish loading listen to {@link OnDidFinishLoadingStyleListener} callback.
-   * </p>
-   * If the style fails to load or an invalid style URL is set, the map view will become blank.
-   * An error message will be logged in the Android logcat and provided to the {@link OnDidFailLoadingMapListener}
-   * callback.
-   *
-   * @param url The URL of the map style
-   * @see Style
-   */
-  public void setStyleUrl(@NonNull String url) {
-    if (nativeMapView != null) {
-      // null-checking the nativeMapView as it can be mistakenly called after it's been destroyed
-      nativeMapView.setStyleUrl(url);
-    }
-  }
-
-  /**
    * Loads a new style from the specified offline region definition and moves the map camera to that region.
    *
    * @param definition the offline region definition
@@ -533,7 +509,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       .target(definition.getBounds().getCenter())
       .zoom(minZoom)
       .build();
-    setStyleUrl(definition.getStyleURL());
+    // TODO fix initialisation @tobrun
+    // setStyleUrl(definition.getStyleURL());
 
     if (mapboxMap == null) {
       mapboxMapOptions.camera(cameraPosition);
@@ -970,7 +947,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    */
   @UiThread
   public void getMapAsync(final @NonNull OnMapReadyCallback callback) {
-    if (mapCallback.isInitialLoad() || mapboxMap == null) {
+    if (mapboxMap == null) {
       // Add callback to the list only if the style hasn't loaded, or the drawing surface isn't ready
       mapCallback.addOnMapReadyCallback(callback);
     } else {
@@ -1012,34 +989,24 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * The initial render callback waits for rendering to happen before making the map visible for end-users.
    * We wait for the second DID_FINISH_RENDERING_FRAME map change event as the first will still show a black surface.
    */
-  private class InitialRenderCallback implements OnDidFinishLoadingStyleListener, OnDidFinishRenderingFrameListener {
+  private class InitialRenderCallback implements OnDidFinishRenderingFrameListener {
 
     private int renderCount;
-    private boolean styleLoaded;
 
     InitialRenderCallback() {
-      addOnDidFinishLoadingStyleListener(this);
       addOnDidFinishRenderingFrameListener(this);
     }
 
     @Override
-    public void onDidFinishLoadingStyle() {
-      styleLoaded = true;
-    }
-
-    @Override
     public void onDidFinishRenderingFrame(boolean fully) {
-      if (styleLoaded) {
-        renderCount++;
-        if (renderCount == 2) {
-          MapView.this.setForeground(null);
-          removeOnDidFinishRenderingFrameListener(this);
-        }
+      renderCount++;
+      if (renderCount == 2) {
+        MapView.this.setForeground(null);
+        removeOnDidFinishRenderingFrameListener(this);
       }
     }
 
     private void onDestroy() {
-      removeOnDidFinishLoadingStyleListener(this);
       removeOnDidFinishRenderingFrameListener(this);
     }
   }
@@ -1139,7 +1106,6 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     OnCameraIsChangingListener, OnCameraDidChangeListener {
 
     private final List<OnMapReadyCallback> onMapReadyCallbackList = new ArrayList<>();
-    private boolean initialLoad = true;
 
     MapCallback() {
       addOnWillStartLoadingMapListener(this);
@@ -1151,11 +1117,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     void initialised() {
-      if (!initialLoad) {
-        // Style has loaded before the drawing surface has been initialized, delivering OnMapReady
-        mapboxMap.onPreMapReady();
-        onMapReady();
-      }
+      mapboxMap.onPreMapReady();
+      onMapReady();
+      mapboxMap.onPostMapReady();
     }
 
     /**
@@ -1175,10 +1139,6 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       }
     }
 
-    boolean isInitialLoad() {
-      return initialLoad;
-    }
-
     void addOnMapReadyCallback(OnMapReadyCallback callback) {
       onMapReadyCallbackList.add(callback);
     }
@@ -1195,7 +1155,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     @Override
     public void onWillStartLoadingMap() {
-      if (mapboxMap != null && !initialLoad) {
+      if (mapboxMap != null) {
         mapboxMap.onStartLoadingMap();
       }
     }
@@ -1203,15 +1163,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     @Override
     public void onDidFinishLoadingStyle() {
       if (mapboxMap != null) {
-        if (initialLoad) {
-          initialLoad = false;
-          mapboxMap.onPreMapReady();
-          onMapReady();
-        } else {
-          mapboxMap.onFinishLoadingStyle();
-        }
+        mapboxMap.onFinishLoadingStyle();
       }
-      initialLoad = false;
     }
 
     @Override
