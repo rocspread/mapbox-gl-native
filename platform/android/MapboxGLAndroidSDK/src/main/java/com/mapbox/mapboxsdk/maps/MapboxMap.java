@@ -437,10 +437,9 @@ public final class MapboxMap {
    * Removes the source. Any references to the source become invalid and should not be used anymore
    *
    * @param sourceId the source to remove
-   * @return the source handle or null if the source was not present
+   * @return true if the source was successfully removed, false - otherwise
    */
-  @Nullable
-  public Source removeSource(@NonNull String sourceId) {
+  public boolean removeSource(@NonNull String sourceId) {
     return nativeMapView.removeSource(sourceId);
   }
 
@@ -448,10 +447,9 @@ public final class MapboxMap {
    * Removes the source, preserving the reference for re-use
    *
    * @param source the source to remove
-   * @return the source
+   * @return true if the source was successfully removed, false - otherwise
    */
-  @Nullable
-  public Source removeSource(@NonNull Source source) {
+  public boolean removeSource(@NonNull Source source) {
     return nativeMapView.removeSource(source);
   }
 

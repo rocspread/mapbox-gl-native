@@ -794,25 +794,22 @@ final class NativeMapView {
     nativeAddSource(source, source.getNativePtr());
   }
 
-  @Nullable
-  public Source removeSource(@NonNull String sourceId) {
+  public boolean removeSource(@NonNull String sourceId) {
     if (checkState("removeSource")) {
-      return null;
+      return false;
     }
     Source source = getSource(sourceId);
     if (source != null) {
       return removeSource(source);
     }
-    return null;
+    return false;
   }
 
-  @Nullable
-  public Source removeSource(@NonNull Source source) {
+  public boolean removeSource(@NonNull Source source) {
     if (checkState("removeSource")) {
-      return null;
+      return false;
     }
-    nativeRemoveSource(source, source.getNativePtr());
-    return source;
+    return nativeRemoveSource(source, source.getNativePtr());
   }
 
   public void addImage(@NonNull String name, @NonNull Bitmap image, boolean sdf) {
@@ -1240,7 +1237,7 @@ final class NativeMapView {
   private native void nativeAddSource(Source source, long sourcePtr) throws CannotAddSourceException;
 
   @Keep
-  private native void nativeRemoveSource(Source source, long sourcePtr);
+  private native boolean nativeRemoveSource(Source source, long sourcePtr);
 
   @Keep
   private native void nativeAddImage(String name, Bitmap bitmap, float pixelRatio, boolean sdf);

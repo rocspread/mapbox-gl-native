@@ -230,7 +230,7 @@ public:
 
     jni::Local<jni::Object<Source>> removeSourceById(JNIEnv&, const jni::String&);
 
-    void removeSource(JNIEnv&, const jni::Object<Source>&, jlong nativePtr);
+    jni::jboolean removeSource(JNIEnv&, const jni::Object<Source>&, jlong nativePtr);
 
     void addImage(JNIEnv&, const jni::String&, const jni::Object<Bitmap>& bitmap, jni::jfloat, jni::jboolean);
 

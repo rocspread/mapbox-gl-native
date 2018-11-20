@@ -908,13 +908,16 @@ void NativeMapView::addSource(JNIEnv& env, const jni::Object<Source>& obj, jlong
     }
 }
 
-void NativeMapView::removeSource(JNIEnv& env, const jni::Object<Source>& obj, jlong sourcePtr) {
+jni::jboolean NativeMapView::removeSource(JNIEnv& env, const jni::Object<Source>& obj, jlong sourcePtr) {
     assert(sourcePtr != 0);
 
     mbgl::android::Source *source = reinterpret_cast<mbgl::android::Source *>(sourcePtr);
     if (source->removeFromMap(env, obj, *map)) {
         source->releaseJavaPeer();
+        return jni::jni_true;
     }
+
+    return jni::jni_false;
 }
 
 void NativeMapView::addImage(JNIEnv& env, const jni::String& name, const jni::Object<Bitmap>& bitmap, jni::jfloat scale, jni::jboolean sdf) {

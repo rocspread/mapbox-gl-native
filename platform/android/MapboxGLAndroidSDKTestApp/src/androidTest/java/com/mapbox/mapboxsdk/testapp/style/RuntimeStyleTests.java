@@ -198,8 +198,8 @@ public class RuntimeStyleTests extends BaseActivityTest {
       mapboxMap.addSource(new VectorSource("my-source", "mapbox://mapbox.mapbox-terrain-v2"));
 
       // Remove
-      Source mySource = mapboxMap.removeSource("my-source");
-      assertNotNull(mySource);
+      boolean removeOk = mapboxMap.removeSource("my-source");
+      assertTrue(removeOk);
       assertNull(mapboxMap.getLayer("my-source"));
 
       // Add
