@@ -41,7 +41,7 @@ class GeometryTileFeature {
 public:
     virtual ~GeometryTileFeature() = default;
     virtual FeatureType getType() const = 0;
-    virtual optional<Value> getValue(const std::string& key) const = 0;
+    virtual Value getValue(const std::string& key) const = 0;
     virtual PropertyMap getProperties() const { return PropertyMap(); }
     virtual FeatureIdentifier getID() const { return NullValue {}; }
     virtual GeometryCollection getGeometries() const = 0;

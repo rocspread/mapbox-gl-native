@@ -234,8 +234,11 @@ Value featureIdAsExpressionValue(EvaluationContext params) {
 
 optional<Value> featurePropertyAsExpressionValue(EvaluationContext params, const std::string& key) {
     assert(params.feature);
-    auto property = params.feature->getValue(key);
-    return property ? toExpressionValue(*property) : optional<Value>();
+    const mbgl::Value property = params.feature->getValue(key);
+    if (property.is<NullValue>()) {
+        return optional<Value>();
+    }
+    return toExpressionValue(property);
 };
 
 optional<std::string> featureTypeAsString(FeatureType type) {
@@ -255,9 +258,7 @@ optional<std::string> featureTypeAsString(FeatureType type) {
 
 optional<double> featurePropertyAsDouble(EvaluationContext params, const std::string& key) {
     assert(params.feature);
-    auto property = params.feature->getValue(key);
-    if (!property) return {};
-    return property->match(
+    return params.feature->getValue(key).match(
         [](double value) { return value; },
         [](uint64_t value) { return optional<double>(static_cast<double>(value)); },
         [](int64_t value) { return optional<double>(static_cast<double>(value)); },
@@ -267,9 +268,7 @@ optional<double> featurePropertyAsDouble(EvaluationContext params, const std::st
 
 optional<std::string> featurePropertyAsString(EvaluationContext params, const std::string& key) {
     assert(params.feature);
-    auto property = params.feature->getValue(key);
-    if (!property) return {};
-    return property->match(
+    return params.feature->getValue(key).match(
         [](std::string value) { return value; },
         [](auto) { return optional<std::string>(); }
     );
@@ -348,7 +347,7 @@ std::unordered_map<std::string, CompoundExpressionRegistry::Definition> initiali
             };
         }
 
-        return params.feature->getValue(key) ? true : false;
+        return !params.feature->getValue(key).is<NullValue>();
     });
     define("has", [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
         return object.find(key) != object.end();
@@ -362,10 +361,10 @@ std::unordered_map<std::string, CompoundExpressionRegistry::Definition> initiali
         }
 
         auto propertyValue = params.feature->getValue(key);
-        if (!propertyValue) {
+        if (propertyValue.is<NullValue>()) {
             return Null;
         }
-        return Value(toExpressionValue(*propertyValue));
+        return Value(toExpressionValue(propertyValue));
     });
     define("get", [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
         if (object.find(key) == object.end()) {
@@ -596,7 +595,7 @@ std::unordered_map<std::string, CompoundExpressionRegistry::Definition> initiali
 
     define("filter-has", [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
         assert(params.feature);
-        return bool(params.feature->getValue(key));
+        return !params.feature->getValue(key).is<NullValue>();
     });
 
     define("filter-has-id", [](const EvaluationContext& params) -> Result<bool> {
