@@ -4,6 +4,13 @@ NS_INLINE NSString *MGLStringFromBOOL(BOOL value) {
     return value ? @"YES" : @"NO";
 }
 
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+NS_INLINE NSString *MGLStringFromSize(CGSize size) { return NSStringFromCGSize(size); }
+#else
+NS_INLINE NSString *MGLStringFromSize(NSSize size) { return NSStringFromSize(size); }
+#endif
+
 #ifdef MGL_LOGGING_DISABLED
 
 #define MGLLogInfo(...)
